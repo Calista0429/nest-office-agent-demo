@@ -1,0 +1,7 @@
+import {createServer} from 'node:http';
+import {readFileSync} from 'node:fs';
+import {GET,POST} from './dist/api.mjs';
+import {DB} from './local-db.mjs';
+const port=Number(process.env.PORT||4173);const types={html:'text/html; charset=utf-8',js:'text/javascript; charset=utf-8',css:'text/css; charset=utf-8',svg:'image/svg+xml'};
+const server=createServer(async(req,res)=>{try{const url=new URL(req.url,`http://127.0.0.1:${port}`);if(url.pathname==='/api/office'){let body='';for await(const c of req){body+=c;if(body.length>20000){res.writeHead(413);res.end();return;}}const request=new Request(url,{method:req.method,headers:{'Content-Type':'application/json'},...(req.method==='POST'?{body}:{})});const response=await(req.method==='POST'?POST:GET)(request,{DB});res.writeHead(response.status,Object.fromEntries(response.headers));res.end(await response.text());return;}const path=url.pathname==='/'?'index.html':url.pathname.slice(1);if(!['index.html','app.js','app.css','favicon.svg'].includes(path)){res.writeHead(404);res.end('Not found');return;}res.writeHead(200,{'Content-Type':types[path.split('.').pop()],'Cache-Control':'no-store'});res.end(readFileSync('dist/public/'+path));}catch(e){console.error(e);res.writeHead(500,{'Content-Type':'application/json'});res.end(JSON.stringify({error:'serviceUnavailable'}));}});
+server.listen(port,'127.0.0.1',()=>console.log(`NEST office demo: http://127.0.0.1:${port}`));

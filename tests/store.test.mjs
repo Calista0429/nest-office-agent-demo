@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {DatabaseSync} from 'node:sqlite';
+import {readFileSync} from 'node:fs';
+import {reserve,cancel,listBookings} from '../lib/store.mjs';
+function database(){const sql=new DatabaseSync(':memory:');sql.exec('PRAGMA foreign_keys=ON;'+readFileSync(new URL('../drizzle/0000_office.sql',import.meta.url),'utf8'));
+return {prepare(q){return {bind(...args){return {async all(){return {results:sql.prepare(q).all(...args)}},async run(){return sql.prepare(q).run(...args)},q,args}}}},async batch(statements){sql.exec('BEGIN');try{const values=statements.map(s=>sql.prepare(s.q).run(...s.args));sql.exec('COMMIT');return values;}catch(e){sql.exec('ROLLBACK');throw e;}}};}
+const req={date:'2099-01-01',start:9,end:12,count:2,seatIds:['B01','B03'],names:['你','佐藤']};
+test('group conflict rolls back every seat and booking record',async()=>{const db=database();await reserve(db,'u',{...req,count:1,seatIds:['B03']},'one');await assert.rejects(reserve(db,'u',req,'two'));const rows=await listBookings(db,'u');assert.equal(rows.length,1);await reserve(db,'u',{...req,count:1,seatIds:['B01']},'three');assert.equal((await listBookings(db,'u')).length,2);});
+test('failed reschedule keeps original slot and reservation',async()=>{const db=database();await reserve(db,'u',{...req,count:1,seatIds:['B01']},'one');await reserve(db,'u',{...req,count:1,seatIds:['B03']},'two');await assert.rejects(reserve(db,'u',{...req,count:1,seatIds:['B03']},'one','one'));assert.deepEqual((await listBookings(db,'u')).find(b=>b.id==='one').seats,['B01']);await assert.rejects(reserve(db,'u',{...req,count:1,seatIds:['B01']},'three'));});
+test('replaying an identical request is idempotent',async()=>{const db=database();await reserve(db,'u',req,'one');await reserve(db,'u',req,'one');assert.equal((await listBookings(db,'u')).length,1);});
+test('concurrent duplicate requests both return the same booking',async()=>{const db=database();const result=await Promise.all([reserve(db,'u',req,'one'),reserve(db,'u',req,'one')]);assert.equal(result[0].id,result[1].id);assert.equal((await listBookings(db,'u')).length,1);});
+test('replaying an old reschedule never undoes a newer reschedule',async()=>{const db=database();await reserve(db,'u',req,'original');await reserve(db,'u',{...req,start:13,end:15},'change-a','original');await reserve(db,'u',{...req,start:16,end:18},'change-b','original');await reserve(db,'u',{...req,start:13,end:15},'change-a','original');assert.equal((await listBookings(db,'u'))[0].start,16);});
+test('another scope cannot cancel a reservation and cancellation frees slots',async()=>{const db=database();await reserve(db,'u',req,'one');await assert.rejects(cancel(db,'other','one'));await cancel(db,'u','one');assert.equal((await listBookings(db,'u')).length,0);await reserve(db,'u',req,'two');assert.equal((await listBookings(db,'u')).length,1);});

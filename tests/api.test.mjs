@@ -1,0 +1,22 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {DatabaseSync} from 'node:sqlite';
+import {readFileSync} from 'node:fs';
+import {GET,POST} from '../dist/api.mjs';
+import {todayTokyo,addDays} from '../lib/office.mjs';
+function fixture(){const sql=new DatabaseSync(':memory:');sql.exec('PRAGMA foreign_keys=ON;'+readFileSync(new URL('../drizzle/0000_office.sql',import.meta.url),'utf8'));const DB={prepare(q){return {bind(...args){return {q,args,async all(){return {results:sql.prepare(q).all(...args)}}}}}},async batch(items){sql.exec('BEGIN');try{const r=items.map(s=>sql.prepare(s.q).run(...s.args));sql.exec('COMMIT');return r;}catch(e){sql.exec('ROLLBACK');throw e;}}};return {DB};}
+const call=async(env,body,user='tester')=>{const response=await POST(new Request('https://office.example/api/office',{method:'POST',headers:{'Content-Type':'application/json','oai-authenticated-user-id':user},body:JSON.stringify(body)}),env);return {status:response.status,...await response.json()};};
+test('complete team booking, concurrent conflict recovery, persistence and cancellation flow',async()=>{
+ const env=fixture();const search=await call(env,{action:'search',text:'明天上午给三个人订相邻座位，都要显示器，最好靠窗'});assert.equal(search.request.count,3);assert.ok(search.options.length);
+ const choice=search.options[0];const body={action:'book',request:{...search.request,seatIds:choice.seats.map(s=>s.id)},proposalId:search.proposalId,simulateConflict:true};
+ const conflict=await call(env,body);assert.equal(conflict.status,409);assert.ok(conflict.conflict);assert.ok(conflict.options.length);
+ const read=await GET(new Request('https://office.example/api/office?date='+search.request.date,{headers:{'oai-authenticated-user-id':'tester'}}),env);const state=await read.json();assert.equal(state.bookings.length,0);assert.equal(state.occupied.filter(s=>s.kind==='simulation').length,1);
+ const booked=await call(env,{action:'book',request:{...conflict.request,seatIds:conflict.options[0].seats.map(s=>s.id)},proposalId:conflict.proposalId});assert.equal(booked.status,200);assert.equal(booked.booking.seats.length,3);
+ const repeat=await call(env,{action:'book',request:{...conflict.request,seatIds:booked.booking.seats},proposalId:conflict.proposalId});assert.equal(repeat.booking.id,booked.booking.id);
+ const unauthorized=await call(env,{action:'cancel',id:booked.booking.id},'other');assert.equal(unauthorized.status,400);
+ const cancelled=await call(env,{action:'cancel',id:booked.booking.id});assert.equal(cancelled.status,200);
+});
+test('invalid booking inputs are rejected without writes',async()=>{const env=fixture();const result=await call(env,{action:'book',request:{date:todayTokyo(),start:18,end:9,count:1,seatIds:['A02']},proposalId:'invalid'});assert.equal(result.status,400);const r=await GET(new Request('https://office.example/api/office',{headers:{'oai-authenticated-user-id':'tester'}}),env);assert.equal((await r.json()).bookings.length,0);});
+test('successful reschedule replaces old slot without creating another record',async()=>{const env=fixture();const date=addDays(todayTokyo(),1);const selected=await call(env,{action:'select',request:{date,start:9,end:12,count:1,seatIds:['A02'],names:['你']}});const b=await call(env,{action:'book',request:{...selected.request,seatIds:['A02']},proposalId:selected.proposalId});const modified=await call(env,{action:'book',request:{...selected.request,start:13,end:17,seatIds:['A02']},proposalId:'change-1',replaceId:b.booking.id});assert.equal(modified.booking.start,13);assert.equal(modified.booking.id,b.booking.id);const fresh=await call(env,{action:'select',request:{date,start:9,end:12,count:1,seatIds:['A02']}});assert.equal(fresh.options.length,1);});
+test('simulated conflict during overlapping reschedule recovers and preserves original',async()=>{const env=fixture();const request={date:addDays(todayTokyo(),1),start:9,end:12,count:1,seatIds:['A02'],names:['你']};await call(env,{action:'book',request,proposalId:'original'});const conflict=await call(env,{action:'book',request:{...request,start:10,end:13},proposalId:'change',replaceId:'original',simulateConflict:true});assert.equal(conflict.status,409);assert.ok(conflict.options.length);});
+test('near-colleague search does not invent presence outside their reservation time',async()=>{const r=await call(fixture(),{action:'search',text:'明天上午找一个离Alex近的座位'});assert.equal(r.request.action,'clarify');});

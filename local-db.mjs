@@ -1,0 +1,10 @@
+import {DatabaseSync} from 'node:sqlite';
+import {mkdirSync,readFileSync} from 'node:fs';
+import {dirname,resolve} from 'node:path';
+import {fileURLToPath} from 'node:url';
+const dbPath=process.env.NEST_DB_PATH?resolve(process.env.NEST_DB_PATH):fileURLToPath(new URL('.data/office.sqlite',import.meta.url));
+mkdirSync(dirname(dbPath),{recursive:true});
+const sql=new DatabaseSync(dbPath);
+sql.exec('PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;');
+if(!sql.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='bookings'").get())sql.exec(readFileSync(new URL('drizzle/0000_office.sql',import.meta.url),'utf8'));
+export const DB={prepare(q){return {bind(...args){return {q,args,async all(){return {results:sql.prepare(q).all(...args)}},async run(){return sql.prepare(q).run(...args)}}}}},async batch(statements){sql.exec('BEGIN IMMEDIATE');try{const results=statements.map(s=>sql.prepare(s.q).run(...s.args));sql.exec('COMMIT');return results;}catch(e){sql.exec('ROLLBACK');throw e;}}};

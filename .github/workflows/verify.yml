@@ -1,0 +1,28 @@
+name: Verify and capture use cases
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['docs/screenshots/**']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install
+      - run: npm run build
+      - run: npm test
+      - run: npx playwright-core install --with-deps chromium
+      - run: npm run screenshots
+      - uses: actions/upload-artifact@v4
+        with:
+          name: use-case-screenshots
+          path: docs/screenshots/
+          if-no-files-found: error

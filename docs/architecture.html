@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEST · プロジェクト構成図</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js" integrity="sha384-en/ztfPSRkGfME4KIm05joYXynqzUgbsG5nMrj/xEFAHXkeZfO3yMK8QQ+mP7p1/" crossorigin="anonymous"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: #020617;
+      min-height: 100vh;
+      padding: 2rem;
+      color: white;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      margin-bottom: 2rem;
+    }
+
+    .header-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .pulse-dot {
+      width: 12px;
+      height: 12px;
+      background: #22d3ee;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
+
+    .subtitle {
+      color: #94a3b8;
+      font-size: 0.875rem;
+      margin-left: 1.75rem;
+    }
+
+    .diagram-container {
+      background: rgba(15, 23, 42, 0.5);
+      border-radius: 1rem;
+      border: 1px solid #1e293b;
+      padding: 1.5rem;
+      overflow-x: auto;
+    }
+
+    svg {
+      width: 100%;
+      min-width: 900px;
+      display: block;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .card {
+      background: rgba(15, 23, 42, 0.5);
+      border-radius: 0.75rem;
+      border: 1px solid #1e293b;
+      padding: 1.25rem;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .card-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .card-dot.cyan { background: #22d3ee; }
+    .card-dot.emerald { background: #34d399; }
+    .card-dot.violet { background: #a78bfa; }
+    .card-dot.amber { background: #fbbf24; }
+    .card-dot.rose { background: #fb7185; }
+
+    .card h3 {
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .card ul {
+      list-style: none;
+      color: #94a3b8;
+      font-size: 0.75rem;
+    }
+
+    .card li {
+      margin-bottom: 0.375rem;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      color: #475569;
+      font-size: 0.75rem;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 0.5rem;
+      margin-left: auto;
+      flex-shrink: 0;
+      align-items: center;
+    }
+    .toolbar-toggle {
+      background: transparent;
+      border: none;
+      color: #475569;
+      cursor: pointer;
+      font-size: 1.25rem;
+      line-height: 1;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.375rem;
+      transition: color 0.2s, background 0.2s;
+    }
+    .toolbar-toggle:hover { color: #94a3b8; background: rgba(30, 41, 59, 0.5); }
+    .toolbar-actions {
+      display: none;
+      gap: 0.5rem;
+    }
+    .toolbar.expanded .toolbar-actions { display: flex; }
+    .toolbar-actions button {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid #334155;
+      color: #94a3b8;
+      padding: 0.375rem 0.75rem;
+      border-radius: 0.375rem;
+      font-family: inherit;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .toolbar-actions button:hover {
+      background: rgba(51, 65, 85, 0.8);
+      color: white;
+      border-color: #475569;
+    }
+
+    @media print {
+      body { background: #020617; padding: 1rem; }
+      .toolbar { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="report-container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-row">
+        <div class="pulse-dot"></div>
+        <h1>NEST / オフィス予約アーキテクチャ</h1>
+        <div class="toolbar">
+          <div class="toolbar-actions">
+            <button onclick="copyAsImage(this)">📋 Copy</button>
+            <button onclick="downloadPNG(this)">🖼️ PNG</button>
+            <button onclick="downloadPDF(this)">📄 PDF</button>
+          </div>
+          <button class="toolbar-toggle" onclick="this.parentElement.classList.toggle('expanded')" title="Export options" aria-label="Export options">⋯</button>
+        </div>
+      </div>
+      <p class="subtitle">日本語・英語の座席予約デモ — Implemented local flow &amp; optional cloud target</p>
+    </div>
+
+    <!-- Main Diagram -->
+    <div class="diagram-container">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 790" role="img" aria-labelledby="diagram-title diagram-desc" style="font-family:'JetBrains Mono',monospace">
+<title id="diagram-title">NEST — Office booking architecture</title><desc id="diagram-desc">A React browser sends requests to a Node API. A rule-based Japanese and English parser and seat recommendation engine find options. Transactional storage saves confirmed bookings in SQLite. A separate optional build targets a Worker with D1; it is not deployed. No LLM is connected.</desc>
+<defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#1e293b" stroke-width=".5"/></pattern><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><path d="M0 0L10 3.5L0 7Z" fill="#64748b"/></marker></defs>
+<rect width="1000" height="790" fill="#020617"/><rect width="1000" height="790" fill="url(#grid)"/>
+<rect x="20" y="20" width="960" height="510" rx="12" fill="none" stroke="#475569" stroke-dasharray="8 4"/>
+<text x="43" y="52" fill="#e2e8f0" font-size="13" font-weight="600">01 / LOCAL DEMO — IMPLEMENTED</text><text x="43" y="73" fill="#94a3b8" font-size="10">Node.js 24+ · 127.0.0.1:4173 · Japan time (Asia/Tokyo)</text>
+<!-- Connections are behind all component boxes. -->
+<g stroke="#64748b" stroke-width="1.5" fill="none" marker-end="url(#arrowhead)"><path d="M275 150H350"/><path d="M462 200V260"/><path d="M462 340V390"/><path d="M350 430H315V180H350"/><path d="M610 150H812V270"/><path d="M812 360V405"/><path d="M162 200V260"/></g>
+<path d="M275 430H295V220H370V200" fill="none" stroke="#fb7185" stroke-width="1.4" stroke-dasharray="4 4" marker-end="url(#arrowhead)"/>
+<text x="313" y="136" fill="#94a3b8" font-size="9" text-anchor="middle">JSON</text><text x="477" y="234" fill="#94a3b8" font-size="9">search</text><text x="477" y="367" fill="#94a3b8" font-size="9">constraints</text><text x="694" y="136" fill="#94a3b8" font-size="9">read / confirmed write</text><text x="827" y="387" fill="#94a3b8" font-size="9">SQL</text>
+
+<rect x="50" y="100" width="225" height="100" rx="6" fill="#0f172a"/><rect x="50" y="100" width="225" height="100" rx="6" fill="rgba(8,51,68,.4)" stroke="#22d3ee" stroke-width="1.5"/>
+<text x="66" y="125" fill="#22d3ee" font-size="13" font-weight="600">React browser UI</text>
+<text x="66" y="145" fill="#cbd5e1" font-size="10">SVG map · 30 desks / 3 zones</text>
+<text x="66" y="162" fill="#cbd5e1" font-size="10">Assistant · bookings · people</text>
+<text x="66" y="179" fill="#cbd5e1" font-size="10">Japanese / English switch</text>
+<rect x="50" y="260" width="225" height="90" rx="6" fill="#0f172a"/><rect x="50" y="260" width="225" height="90" rx="6" fill="rgba(8,51,68,.4)" stroke="#22d3ee" stroke-width="1.5"/>
+<text x="66" y="285" fill="#22d3ee" font-size="13" font-weight="600">Browser state</text>
+<text x="66" y="305" fill="#cbd5e1" font-size="10">React: draft + proposals</text>
+<text x="66" y="322" fill="#cbd5e1" font-size="10">localStorage: language only</text>
+<text x="66" y="339" fill="#cbd5e1" font-size="10">Reservations live in SQLite</text>
+<rect x="50" y="390" width="225" height="80" rx="6" fill="#0f172a"/><rect x="50" y="390" width="225" height="80" rx="6" fill="rgba(136,19,55,.4)" stroke="#fb7185" stroke-width="1.5"/>
+<text x="66" y="415" fill="#fb7185" font-size="13" font-weight="600">Local demo scope</text>
+<text x="66" y="435" fill="#cbd5e1" font-size="10">One shared localhost scope</text>
+<text x="66" y="452" fill="#cbd5e1" font-size="10">No production login system</text>
+<rect x="350" y="100" width="260" height="100" rx="6" fill="#0f172a"/><rect x="350" y="100" width="260" height="100" rx="6" fill="rgba(6,78,59,.4)" stroke="#34d399" stroke-width="1.5"/>
+<text x="366" y="125" fill="#34d399" font-size="13" font-weight="600">Office API · /api/office</text>
+<text x="366" y="145" fill="#cbd5e1" font-size="10">GET: seats + active bookings</text>
+<text x="366" y="162" fill="#cbd5e1" font-size="10">POST: search / select</text>
+<text x="366" y="179" fill="#cbd5e1" font-size="10">POST: book / cancel / reschedule</text>
+<rect x="350" y="260" width="260" height="80" rx="6" fill="#0f172a"/><rect x="350" y="260" width="260" height="80" rx="6" fill="rgba(6,78,59,.4)" stroke="#34d399" stroke-width="1.5"/>
+<text x="366" y="285" fill="#34d399" font-size="13" font-weight="600">Parser + validation</text>
+<text x="366" y="305" fill="#cbd5e1" font-size="10">Japanese / English rules</text>
+<text x="366" y="322" fill="#cbd5e1" font-size="10">Date · time · people · preferences</text>
+<rect x="350" y="390" width="260" height="80" rx="6" fill="#0f172a"/><rect x="350" y="390" width="260" height="80" rx="6" fill="rgba(6,78,59,.4)" stroke="#34d399" stroke-width="1.5"/>
+<text x="366" y="415" fill="#34d399" font-size="13" font-weight="600">Seat recommender</text>
+<text x="366" y="435" fill="#cbd5e1" font-size="10">Hard constraints + preference score</text>
+<text x="366" y="452" fill="#cbd5e1" font-size="10">Availability + physical adjacency</text>
+<rect x="680" y="270" width="265" height="90" rx="6" fill="#0f172a"/><rect x="680" y="270" width="265" height="90" rx="6" fill="rgba(6,78,59,.4)" stroke="#34d399" stroke-width="1.5"/>
+<text x="696" y="295" fill="#34d399" font-size="13" font-weight="600">Transactional booking store</text>
+<text x="696" y="315" fill="#cbd5e1" font-size="10">Atomic group writes + rollback</text>
+<text x="696" y="332" fill="#cbd5e1" font-size="10">Idempotent operation fingerprints</text>
+<text x="696" y="349" fill="#cbd5e1" font-size="10">Reschedule preserves original on fail</text>
+<rect x="680" y="405" width="265" height="90" rx="6" fill="#0f172a"/><rect x="680" y="405" width="265" height="90" rx="6" fill="rgba(76,29,149,.4)" stroke="#a78bfa" stroke-width="1.5"/>
+<text x="696" y="430" fill="#a78bfa" font-size="13" font-weight="600">SQLite · .data/office.sqlite</text>
+<text x="696" y="450" fill="#cbd5e1" font-size="10">bookings / slots</text>
+<text x="696" y="467" fill="#cbd5e1" font-size="10">booking_operations</text>
+<text x="696" y="484" fill="#cbd5e1" font-size="10">UNIQUE(scope, date, seat, hour)</text>
+<text x="43" y="512" fill="#94a3b8" font-size="10">Alternative preview adapter: Python CGI → same Node API + SQLite. No LLM or calendar service is connected.</text>
+<rect x="20" y="565" width="960" height="145" rx="12" fill="none" stroke="#fbbf24" stroke-dasharray="8 4"/>
+<text x="43" y="592" fill="#fbbf24" font-size="12" font-weight="600">02 / OPTIONAL BUILD TARGET — NOT DEPLOYED</text>
+<path d="M320 641H380" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+<rect x="50" y="610" width="270" height="65" rx="6" fill="#0f172a"/><rect x="50" y="610" width="270" height="65" rx="6" fill="rgba(120,53,15,.3)" stroke="#fbbf24" stroke-width="1.5"/>
+<text x="66" y="635" fill="#fbbf24" font-size="13" font-weight="600">Cloudflare Worker</text>
+<text x="66" y="655" fill="#cbd5e1" font-size="10">Same API + embedded browser assets</text>
+<rect x="380" y="610" width="260" height="65" rx="6" fill="#0f172a"/><rect x="380" y="610" width="260" height="65" rx="6" fill="rgba(76,29,149,.4)" stroke="#a78bfa" stroke-width="1.5"/>
+<text x="396" y="635" fill="#a78bfa" font-size="13" font-weight="600">D1 binding: DB</text>
+<text x="396" y="655" fill="#cbd5e1" font-size="10">Same SQL schema + batch adapter</text>
+<text x="680" y="635" fill="#cbd5e1" font-size="10">Requires trusted identity proxy</text><text x="680" y="654" fill="#94a3b8" font-size="9">and deployment configuration</text><text x="680" y="673" fill="#94a3b8" font-size="9">esbuild → dist/server/index.js</text>
+<circle cx="60" cy="750" r="4" fill="#22d3ee"/><text x="73" y="754" fill="#94a3b8" font-size="11">Frontend</text>
+<circle cx="240" cy="750" r="4" fill="#34d399"/><text x="253" y="754" fill="#94a3b8" font-size="11">Backend</text>
+<circle cx="420" cy="750" r="4" fill="#a78bfa"/><text x="433" y="754" fill="#94a3b8" font-size="11">Storage</text>
+<circle cx="600" cy="750" r="4" fill="#fb7185"/><text x="613" y="754" fill="#94a3b8" font-size="11">Scope</text>
+<circle cx="780" cy="750" r="4" fill="#fbbf24"/><text x="793" y="754" fill="#94a3b8" font-size="11">Optional cloud</text>
+</svg>
+    </div>
+
+    <!-- Info Cards -->
+    <div class="cards">
+      <div class="card"><div class="card-header"><div class="card-dot cyan"></div><h3>01 · 自然言語で探す</h3></div><ul><li>日本語と英語のルールベース解析</li><li>日時・人数・設備・隣接条件を抽出</li><li>候補を提示し、ユーザーが予約を確定</li><li>LLM・外部カレンダーは未接続</li></ul></div>
+      <div class="card"><div class="card-header"><div class="card-dot emerald"></div><h3>02 · 予約を確実に保存</h3></div><ul><li>全員分を一つのトランザクションで保存</li><li>座席・日付・時間の重複をDBで防止</li><li>競合時は元の予約を保ち、代替案を提示</li><li>再送しても二重予約にならない仕組み</li></ul></div>
+      <div class="card"><div class="card-header"><div class="card-dot violet"></div><h3>03 · 小さく、検証しやすく</h3></div><ul><li>React + esbuild + Node.js + SQLite</li><li>予約は永続化、言語設定はブラウザーに保存</li><li>Worker / D1向けビルドを同梱（未配備）</li><li>将来のLLMは解析部分を置き換えて接続可能</li></ul></div>
+    </div>
+
+    <!-- Footer -->
+    <p class="footer">
+      NEST · 2026-11-22 · Diagram template: Cocoon AI / architecture-diagram-generator (MIT)
+    </p>
+  </div>
+
+  <script>
+    async function copyAsImage(btn) {
+      const orig = btn.textContent;
+      try {
+        const el = document.getElementById('report-container');
+        const r = el.getBoundingClientRect();
+        const pad = 32;
+        const canvas = await html2canvas(document.body, { backgroundColor: '#020617', scale: 2, useCORS: true, ignoreElements: (e) => e.classList && e.classList.contains('toolbar'), x: r.left + window.scrollX - pad, y: r.top + window.scrollY - pad, width: r.width + pad * 2, height: r.height + pad * 2 });
+        const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+        btn.textContent = '✓ Copied!';
+      } catch (e) {
+        btn.textContent = '✗ Failed';
+      }
+      setTimeout(() => btn.textContent = orig, 2000);
+    }
+
+    async function downloadPNG(btn) {
+      const orig = btn.textContent;
+      btn.textContent = '⏳ ...';
+      try {
+        const el = document.getElementById('report-container');
+        const r = el.getBoundingClientRect();
+        const pad = 32;
+        const canvas = await html2canvas(document.body, { backgroundColor: '#020617', scale: 2, useCORS: true, ignoreElements: (e) => e.classList && e.classList.contains('toolbar'), x: r.left + window.scrollX - pad, y: r.top + window.scrollY - pad, width: r.width + pad * 2, height: r.height + pad * 2 });
+        const link = document.createElement('a');
+        link.download = 'diagram.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        btn.textContent = '✓ Done!';
+      } catch (e) {
+        btn.textContent = '✗ Failed';
+      }
+      setTimeout(() => btn.textContent = orig, 2000);
+    }
+
+    async function downloadPDF(btn) {
+      const orig = btn.textContent;
+      btn.textContent = '⏳ ...';
+      try {
+        const el = document.getElementById('report-container');
+        const r = el.getBoundingClientRect();
+        const pad = 32;
+        const canvas = await html2canvas(document.body, { backgroundColor: '#020617', scale: 2, useCORS: true, ignoreElements: (e) => e.classList && e.classList.contains('toolbar'), x: r.left + window.scrollX - pad, y: r.top + window.scrollY - pad, width: r.width + pad * 2, height: r.height + pad * 2 });
+        const imgData = canvas.toDataURL('image/png');
+        const { jsPDF } = window.jspdf;
+        const orientation = canvas.width > canvas.height ? 'landscape' : 'portrait';
+        const pdf = new jsPDF({ orientation, unit: 'px', format: [canvas.width, canvas.height], hotfixes: ['px_scaling'] });
+        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+        pdf.save('diagram.pdf');
+        btn.textContent = '✓ Done!';
+      } catch (e) {
+        btn.textContent = '✗ Failed';
+      }
+      setTimeout(() => btn.textContent = orig, 2000);
+    }
+  </script>
+</body>
+</html>
