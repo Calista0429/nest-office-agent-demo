@@ -3,7 +3,7 @@
 [README](../README.en.md) | [日本語](USE_CASES.ja.md)
 
 <!-- capture-status:start -->
-**Capture pending:** These are walkthroughs for implemented features. Browser startup is blocked in the authoring environment, so screenshots have not yet been generated. After every check in `npm run screenshots` succeeds, real captures are inserted below.
+Captured from real UI interactions on 2026-11-22T11:07:15.003Z, using Chromium 153.0.8010.12 and an isolated temporary SQLite database.
 <!-- capture-status:end -->
 
 ## 01. Explore available desks
@@ -11,7 +11,7 @@
 Start in Japanese and choose a date, time and area. The map shows available desks, occupied seats and fictional colleagues.
 
 <!-- capture:01-ja-office-map.png:start -->
-`docs/screenshots/01-ja-office-map.png` — pending capture.
+![日本語のオフィスマップ / Japanese office map](screenshots/01-ja-office-map.png)
 <!-- capture:01-ja-office-map.png:end -->
 
 ## 02. Book from the map
@@ -19,7 +19,7 @@ Start in Japanese and choose a date, time and area. The map shows available desk
 Select available desk A02 and choose Book this desk. Review the option before confirming; selecting a desk alone does not save a booking.
 
 <!-- capture:02-ja-map-selection.png:start -->
-`docs/screenshots/02-ja-map-selection.png` — pending capture.
+![座席を選び、候補を確認 / Select a desk](screenshots/02-ja-map-selection.png)
 <!-- capture:02-ja-map-selection.png:end -->
 
 ## 03. Persist across reloads
@@ -27,7 +27,7 @@ Select available desk A02 and choose Book this desk. Review the option before co
 Confirm a booking, reload the page, and open My bookings to verify the saved desk and time.
 
 <!-- capture:03-ja-saved-booking.png:start -->
-`docs/screenshots/03-ja-saved-booking.png` — pending capture.
+![保存と再読み込み / Persistent booking](screenshots/03-ja-saved-booking.png)
 <!-- capture:03-ja-saved-booking.png:end -->
 
 ## 04. Reschedule a booking
@@ -35,7 +35,7 @@ Confirm a booking, reload the page, and open My bookings to verify the saved des
 Choose Reschedule and enter “Change to tomorrow afternoon”. Confirm the option and verify the updated 13:00–18:00 slot.
 
 <!-- capture:04-ja-reschedule.png:start -->
-`docs/screenshots/04-ja-reschedule.png` — pending capture.
+![既存予約の日時を変更 / Reschedule](screenshots/04-ja-reschedule.png)
 <!-- capture:04-ja-reschedule.png:end -->
 
 ## 05. Cancel a booking
@@ -43,7 +43,7 @@ Choose Reschedule and enter “Change to tomorrow afternoon”. Confirm the opti
 Cancel the reservation from My bookings. The booking disappears and the slots become available again.
 
 <!-- capture:05-ja-cancellation.png:start -->
-`docs/screenshots/05-ja-cancellation.png` — pending capture.
+![予約をキャンセル / Cancellation](screenshots/05-ja-cancellation.png)
 <!-- capture:05-ja-cancellation.png:end -->
 
 ## 06. Find adjacent team desks
@@ -51,7 +51,7 @@ Cancel the reservation from My bookings. The booking disappears and the slots be
 Ask for three adjacent desks next Wednesday, 09:00–18:00, for yourself, Tanaka and Sato, with monitors required and windows preferred. The proposal preserves required constraints when a window group is unavailable.
 
 <!-- capture:06-ja-team-proposal.png:start -->
-`docs/screenshots/06-ja-team-proposal.png` — pending capture.
+![自然言語で3人の隣接席を提案 / Adjacent team desks](screenshots/06-ja-team-proposal.png)
 <!-- capture:06-ja-team-proposal.png:end -->
 
 ## 07. Recover from a conflict
@@ -59,7 +59,7 @@ Ask for three adjacent desks next Wednesday, 09:00–18:00, for yourself, Tanaka
 Enable conflict simulation and confirm. The demo inserts a conflicting reservation, rolls back the group attempt and offers new available options.
 
 <!-- capture:07-ja-conflict-recovery.png:start -->
-`docs/screenshots/07-ja-conflict-recovery.png` — pending capture.
+![競合時に代替案を提案 / Conflict recovery](screenshots/07-ja-conflict-recovery.png)
 <!-- capture:07-ja-conflict-recovery.png:end -->
 
 ## 08. Confirm the whole group
@@ -67,7 +67,7 @@ Enable conflict simulation and confirm. The demo inserts a conflicting reservati
 Confirm a replacement option and verify that all three desks and participant names are stored in one booking.
 
 <!-- capture:08-ja-team-booking.png:start -->
-`docs/screenshots/08-ja-team-booking.png` — pending capture.
+![全員分をまとめて確定 / Atomic team booking](screenshots/08-ja-team-booking.png)
 <!-- capture:08-ja-team-booking.png:end -->
 
 ## 09. Switch languages
@@ -75,7 +75,7 @@ Confirm a replacement option and verify that all three desks and participant nam
 Switch to English. Booking labels and names change, and the language preference persists after reload.
 
 <!-- capture:09-en-bookings.png:start -->
-`docs/screenshots/09-en-bookings.png` — pending capture.
+![英語へ切り替え / English bookings](screenshots/09-en-bookings.png)
 <!-- capture:09-en-bookings.png:end -->
 
 ## 10. Request a desk in English
@@ -83,7 +83,7 @@ Switch to English. Booking labels and names change, and the language preference 
 Enter “Find a window desk with a monitor tomorrow morning” and review the English recommendation and schedule.
 
 <!-- capture:10-en-natural-language.png:start -->
-`docs/screenshots/10-en-natural-language.png` — pending capture.
+![英語で自然言語予約 / English natural-language request](screenshots/10-en-natural-language.png)
 <!-- capture:10-en-natural-language.png:end -->
 
 ## 11. Locate teammates
@@ -91,7 +91,7 @@ Enter “Find a window desk with a monitor tomorrow morning” and review the En
 Open People to see locations for the selected time. Show on map focuses the corresponding desk.
 
 <!-- capture:11-en-people.png:start -->
-`docs/screenshots/11-en-people.png` — pending capture.
+![メンバーの位置 / Locate teammates](screenshots/11-en-people.png)
 <!-- capture:11-en-people.png:end -->
 
 ## 12. Use a mobile viewport
@@ -99,7 +99,7 @@ Open People to see locations for the selected time. Show on map focuses the corr
 At a 390px viewport, scroll the office map horizontally and use the assistant below it.
 
 <!-- capture:12-en-mobile.png:start -->
-`docs/screenshots/12-en-mobile.png` — pending capture.
+![モバイル表示 / Mobile layout](screenshots/12-en-mobile.png)
 <!-- capture:12-en-mobile.png:end -->
 
 ## 13. Inspect the architecture
@@ -107,5 +107,5 @@ At a 390px viewport, scroll the office map horizontally and use the assistant be
 The Cocoon AI template shows the implemented local flow separately from the undeployed cloud build target.
 
 <!-- capture:13-architecture.png:start -->
-`docs/screenshots/13-architecture.png` — pending capture.
+![プロジェクト構成図 / Project architecture](screenshots/13-architecture.png)
 <!-- capture:13-architecture.png:end -->

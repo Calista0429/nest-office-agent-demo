@@ -57,7 +57,7 @@ npm run screenshots
 
 `NEST_BROWSER_PATH` でChrome実行ファイル、`NEST_SCREENSHOT_PORT` で撮影用サーバーのポートを指定できます。GitHub Actionsでも同じ検証を行い、画像を `use-case-screenshots` アーティファクトに保存します。Actionsは画像を自動コミットしません。
 
-**現時点の撮影状況:** この作業環境ではChromiumの起動がmacOSサンドボックスに拒否されたため、UIスクリーンショットはまだ生成していません。合成画像を実際の動作画面として掲載していません。撮影スクリプトとCI定義を同梱しています。
+**現時点の撮影状況:** 13枚の実操作スクリーンショットを保存しました。[ギャラリー](docs/USE_CASES.ja.md)をご覧ください。
 
 ## アーキテクチャ
 

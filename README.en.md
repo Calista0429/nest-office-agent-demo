@@ -54,7 +54,7 @@ The script drives the real UI against a **temporary SQLite database and dedicate
 
 Set `NEST_BROWSER_PATH` to use a specific Chrome executable, or `NEST_SCREENSHOT_PORT` to change the capture server port. GitHub Actions runs the same checks and uploads the images as the `use-case-screenshots` artifact. It does not automatically commit images.
 
-**Current capture status:** Chromium could not start in the authoring environment because macOS sandbox permissions denied its startup. UI screenshots have not yet been generated. The project includes the capture script and CI workflow; synthetic images are not presented as actual application screenshots.
+**Current capture status:** 13 real UI screenshots are available in the [gallery](docs/USE_CASES.en.md).
 
 ## Architecture
 
